@@ -7,8 +7,12 @@ import com.itmuch.contentcenter.domain.entity.content.Share;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cloud.client.ServiceInstance;
+import org.springframework.cloud.client.discovery.DiscoveryClient;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
+
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
@@ -20,14 +24,24 @@ public class ShareService {
     @Autowired
     private final RestTemplate restTemplate;
 
+    @Autowired
+    private final DiscoveryClient discoveryClient;
+
     public ShareDTO findById(Integer id) {
         // 获取分享详情
         Share share = shareMapper.selectByPrimaryKey(id);
         Integer userId = share.getUserId();
 
+        List<ServiceInstance> instances = discoveryClient.getInstances("user-center");
+        String targetUrl = instances.stream()
+                .map(x -> x.getUri().toString() + "/users/{userId}")
+                .findFirst()
+                .orElseThrow(() -> new IllegalArgumentException("没有找到对应的用户中心服务！"));
+
         userId = 1;
+        // "http://localhost:8080/users/{userId}"
         UserDTO userDTO = restTemplate.getForObject(
-                "http://localhost:8080/users/{userId}",
+                targetUrl,
                 UserDTO.class,
                 userId);
 

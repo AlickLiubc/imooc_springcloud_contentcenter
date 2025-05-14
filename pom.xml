@@ -50,8 +50,40 @@
             <version>1.18.8</version>
             <scope>provided</scope>
         </dependency>
+        <!-- spring-boot-starter-xxx -->
+        <!-- xxx-spring-boot-starter -->
+        <!-- spring-cloud-starter-{spring cloud项目名称}-[{模块名称}] -->
+        <!-- feign spring-cloud-starter-openfeign -->
+        <!-- sentinel spring-cloud-starter-alibaba-sentinel -->
+        <dependency>
+            <groupId>org.springframework.cloud</groupId>
+            <artifactId>spring-cloud-starter-alibaba-nacos-discovery</artifactId>
+        </dependency>
 
     </dependencies>
+
+    <dependencyManagement>
+        <dependencies>
+            <!-- 整合SpringCloud -->
+            <dependency>
+                <groupId>org.springframework.cloud</groupId>
+                <artifactId>spring-cloud-dependencies</artifactId>
+                <version>Greenwich.SR1</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+
+            <!-- 整合SpringCloud Alibaba -->
+            <dependency>
+                <groupId>org.springframework.cloud</groupId>
+                <artifactId>spring-cloud-alibaba</artifactId>
+                <version>0.9.0.RELEASE</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+
+        </dependencies>
+    </dependencyManagement>
 
     <build>
         <plugins>
