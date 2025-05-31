@@ -5,6 +5,7 @@ import com.itmuch.contentcenter.domain.dto.content.ShareDTO;
 import com.itmuch.contentcenter.domain.dto.user.UserDTO;
 import com.itmuch.contentcenter.domain.entity.content.Share;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.client.ServiceInstance;
@@ -13,8 +14,11 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
 import java.util.List;
+import java.util.concurrent.ThreadLocalRandom;
+import java.util.stream.Collectors;
 
 @Service
+@Slf4j
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class ShareService {
 
@@ -33,15 +37,29 @@ public class ShareService {
         Integer userId = share.getUserId();
 
         List<ServiceInstance> instances = discoveryClient.getInstances("user-center");
-        String targetUrl = instances.stream()
-                .map(x -> x.getUri().toString() + "/users/{userId}")
-                .findFirst()
-                .orElseThrow(() -> new IllegalArgumentException("没有找到对应的用户中心服务！"));
+//        String targetUrl = instances.stream()
+//                .map(x -> x.getUri().toString() + "/users/{userId}")
+//                .findFirst()
+//                .orElseThrow(() -> new IllegalArgumentException("没有找到对应的用户中心服务！"));
+
+//        List<String> targetURLs = instances.stream()
+//                .map(x -> x.getUri().toString() + "/users/{userId}")
+//                .collect(Collectors.toList());
+//
+//        int i = ThreadLocalRandom.current().nextInt(targetURLs.size());
+//
+//        userId = 1;
+//        String targetURL = targetURLs.get(i);
+//        log.info("请求的目标地址为：[{}]", targetURL);
+//        // "http://localhost:8080/users/{userId}"
+//        UserDTO userDTO = restTemplate.getForObject(
+//                targetURL,
+//                UserDTO.class,
+//                userId);
 
         userId = 1;
-        // "http://localhost:8080/users/{userId}"
         UserDTO userDTO = restTemplate.getForObject(
-                targetUrl,
+                "http://user-center/users/{userId}",
                 UserDTO.class,
                 userId);
 
