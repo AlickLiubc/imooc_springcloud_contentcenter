@@ -25,3 +25,13 @@ ribbon:
   eager-load:
     enabled: true
     clients: user-center
+
+logging:
+  level:
+    com.itmuch.contentcenter.feignclient.UserCenterFeignClient: debug
+feign:
+  client:
+    config:
+      # 想要调用的微服务名称
+      user-center:
+        logger-level: full
