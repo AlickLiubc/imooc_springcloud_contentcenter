@@ -1,7 +1,10 @@
 package com.itmuch.contentcenter;
 
 import com.itmuch.contentcenter.dao.content.ShareMapper;
+import com.itmuch.contentcenter.domain.dto.user.UserDTO;
 import com.itmuch.contentcenter.domain.entity.content.Share;
+import com.itmuch.contentcenter.feignclient.TestBaiduFeignClient;
+import com.itmuch.contentcenter.feignclient.TestUserCenterFeignClient;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.client.ServiceInstance;
 import org.springframework.cloud.client.discovery.DiscoveryClient;
@@ -41,6 +44,23 @@ public class TestController {
     @GetMapping("/test2")
     public List<ServiceInstance> getInstances() {
         return this.discoveryClient.getInstances("user-center");
+    }
+
+    @Autowired
+    private TestUserCenterFeignClient testUserCenterFeignClient;
+
+
+    @GetMapping("/test-query")
+    public UserDTO query(UserDTO userDTO) {
+        return testUserCenterFeignClient.query(userDTO);
+    }
+
+    @Autowired
+    private TestBaiduFeignClient testBaiduFeignClient;
+
+    @GetMapping("/test-baidu")
+    public String baidu() {
+        return testBaiduFeignClient.index();
     }
 
 }

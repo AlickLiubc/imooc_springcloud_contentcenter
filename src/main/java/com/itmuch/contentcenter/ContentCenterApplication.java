@@ -7,7 +7,7 @@ import tk.mybatis.spring.annotation.MapperScan;
 
 @SpringBootApplication
 @MapperScan("com.itmuch")
-@EnableFeignClients
+@EnableFeignClients//(defaultConfiguration = GlobalFeignConfiguration.class)
 public class ContentCenterApplication {
 
     public static void main(String[] args) {
