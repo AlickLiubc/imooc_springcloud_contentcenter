@@ -1,8 +1,17 @@
 package com.itmuch.contentcenter.domain.entity.messaging;
 
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
 import javax.persistence.*;
 
 @Table(name = "rocketmq_transaction_log")
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
 public class RocketmqTransactionLog {
     /**
      * id
