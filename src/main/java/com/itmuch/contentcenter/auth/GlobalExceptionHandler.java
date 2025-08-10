@@ -20,7 +20,7 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<ErrorBody>(
                 ErrorBody.builder()
                         .status(HttpStatus.UNAUTHORIZED.value())
-                        .message("Token不合法，请重试！")
+                        .message(ex.getMessage())
                         .build(),
           HttpStatus.UNAUTHORIZED
         );
