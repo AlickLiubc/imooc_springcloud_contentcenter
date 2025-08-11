@@ -1,13 +1,16 @@
 package com.itmuch.contentcenter;
 
+import com.alibaba.csp.sentinel.annotation.SentinelResource;
 import com.itmuch.contentcenter.dao.content.ShareMapper;
 import com.itmuch.contentcenter.domain.dto.user.UserDTO;
 import com.itmuch.contentcenter.domain.entity.content.Share;
 import com.itmuch.contentcenter.feignclient.TestBaiduFeignClient;
 import com.itmuch.contentcenter.feignclient.TestUserCenterFeignClient;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cloud.client.ServiceInstance;
 import org.springframework.cloud.client.discovery.DiscoveryClient;
+import org.springframework.cloud.context.config.annotation.RefreshScope;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -15,6 +18,7 @@ import java.util.Date;
 import java.util.List;
 
 @RestController
+@RefreshScope
 public class TestController {
 
     @Autowired
@@ -76,6 +80,21 @@ public class TestController {
     public String testB() {
         testService.Common();
         return "test-b";
+    }
+
+    @GetMapping("/test-hot")
+    @SentinelResource("hot")
+    public String testHot(String a, String b) {
+        return a + " " + b;
+    }
+
+
+    @Value("${your.configuration}")
+    private String yourConfiguration;
+
+    @GetMapping("/test-config")
+    public String testConfig() {
+        return this.yourConfiguration;
     }
 
 }
