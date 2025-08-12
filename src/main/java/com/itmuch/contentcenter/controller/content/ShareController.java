@@ -1,14 +1,13 @@
 package com.itmuch.contentcenter.controller.content;
 
+import com.github.pagehelper.PageInfo;
 import com.itmuch.contentcenter.auth.CheckLogin;
 import com.itmuch.contentcenter.domain.dto.content.ShareDTO;
+import com.itmuch.contentcenter.domain.entity.content.Share;
 import com.itmuch.contentcenter.service.content.ShareService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/shares")
@@ -24,4 +23,16 @@ public class ShareController {
         return shareService.findById(id);
     }
 
+
+    @GetMapping("/q")
+    public PageInfo<Share> q(@RequestParam(required = false) String title,
+                             @RequestParam(required = false, defaultValue = "1")Integer pageNo,
+                             @RequestParam(required = false, defaultValue = "100")Integer pageSize
+                      ) {
+        if (pageSize > 100) {
+            pageSize = 100;
+        }
+
+        return this.shareService.selectByParam(title, pageNo, pageSize);
+    }
 }

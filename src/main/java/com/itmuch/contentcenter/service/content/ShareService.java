@@ -1,5 +1,7 @@
 package com.itmuch.contentcenter.service.content;
 
+import com.github.pagehelper.PageHelper;
+import com.github.pagehelper.PageInfo;
 import com.itmuch.contentcenter.dao.content.ShareMapper;
 import com.itmuch.contentcenter.dao.messaging.RocketmqTransactionLogMapper;
 import com.itmuch.contentcenter.domain.dto.content.AuditDTO;
@@ -104,24 +106,25 @@ public class ShareService {
             throw new IllegalArgumentException("审核操作失败！投稿信息已完成审核！");
         }
 
-        if (AuditStatusEnum.PASS.equals(auditDTO.getAuditStatusEnum())) {
-            // 发送事务消息
-            String transactionId = UUID.randomUUID().toString();
-            rocketMQTemplate.sendMessageInTransaction("tx-add-bonus-group",
-                    "add-bonus",
-                    MessageBuilder.withPayload(
-                                new UserAddBonusMessageDTO().builder()
-                                        .userId(share.getUserId())
-                                        .bonus(50)
-                                        .build()
-                            )
-                            .setHeader(RocketMQHeaders.TRANSACTION_ID, transactionId)
-                            .setHeader("share_id", id)
-                            .build(),
-                    auditDTO);
-        } else if (AuditStatusEnum.REJECT.equals(auditDTO.getAuditStatusEnum())) {
-            auditByIdInDB(id, auditDTO);
-        }
+//        if (AuditStatusEnum.PASS.equals(auditDTO.getAuditStatusEnum())) {
+//            // 发送事务消息
+//            String transactionId = UUID.randomUUID().toString();
+//            rocketMQTemplate.sendMessageInTransaction("tx-add-bonus-group",
+//                    "add-bonus",
+//                    MessageBuilder.withPayload(
+//                                new UserAddBonusMessageDTO().builder()
+//                                        .userId(share.getUserId())
+//                                        .bonus(50)
+//                                        .build()
+//                            )
+//                            .setHeader(RocketMQHeaders.TRANSACTION_ID, transactionId)
+//                            .setHeader("share_id", id)
+//                            .build(),
+//                    auditDTO);
+//        } else if (AuditStatusEnum.REJECT.equals(auditDTO.getAuditStatusEnum())) {
+//            auditByIdInDB(id, auditDTO);
+//        }
+        auditByIdInDB(id, auditDTO);
 
         return share;
     }
@@ -149,6 +152,13 @@ public class ShareService {
                                 .log("记录一下审核分享。。。。。。")
                                 .build()
                 );
+    }
+
+    public PageInfo<Share> selectByParam(String title, Integer pageNo, Integer pageSize) {
+        PageHelper.startPage(pageNo, pageSize);
+        List<Share> shares = this.shareMapper.selectByParam(title);
+
+        return new PageInfo<>(shares);
     }
 
 }

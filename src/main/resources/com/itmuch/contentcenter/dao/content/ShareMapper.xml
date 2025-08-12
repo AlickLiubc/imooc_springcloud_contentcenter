@@ -21,4 +21,15 @@
     <result column="audit_status" jdbcType="VARCHAR" property="auditStatus" />
     <result column="reason" jdbcType="VARCHAR" property="reason" />
   </resultMap>
+
+  <select id="selectByParam" resultType="com.itmuch.contentcenter.domain.entity.content.Share">
+    SELECT * FROM share
+    <where>
+        <if test="title != null and title != ''">
+          title LIKE concat('%', #{title}, '%')
+        </if>
+        AND audit_status = 'PASS'
+    </where>
+  </select>
+
 </mapper>
