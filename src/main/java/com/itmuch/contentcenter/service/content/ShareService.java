@@ -2,31 +2,30 @@ package com.itmuch.contentcenter.service.content;
 
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
+import com.itmuch.contentcenter.dao.content.MidUserShareMapper;
 import com.itmuch.contentcenter.dao.content.ShareMapper;
 import com.itmuch.contentcenter.dao.messaging.RocketmqTransactionLogMapper;
 import com.itmuch.contentcenter.domain.dto.content.AuditDTO;
 import com.itmuch.contentcenter.domain.dto.content.ShareDTO;
-import com.itmuch.contentcenter.domain.dto.messaging.UserAddBonusMessageDTO;
+import com.itmuch.contentcenter.domain.dto.user.UserAddBonusDTO;
 import com.itmuch.contentcenter.domain.dto.user.UserDTO;
+import com.itmuch.contentcenter.domain.entity.content.MidUserShare;
 import com.itmuch.contentcenter.domain.entity.content.Share;
 import com.itmuch.contentcenter.domain.entity.messaging.RocketmqTransactionLog;
-import com.itmuch.contentcenter.domain.enums.AuditStatusEnum;
 import com.itmuch.contentcenter.feignclient.UserCenterFeignClient;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.rocketmq.spring.core.RocketMQTemplate;
-import org.apache.rocketmq.spring.support.RocketMQHeaders;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.client.ServiceInstance;
 import org.springframework.cloud.client.discovery.DiscoveryClient;
-import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.RestTemplate;
 
+import javax.servlet.http.HttpServletRequest;
 import java.util.List;
-import java.util.UUID;
 
 @Service
 @Slf4j
@@ -35,6 +34,9 @@ public class ShareService {
 
     @Autowired
     private final ShareMapper shareMapper;
+
+    @Autowired
+    private final MidUserShareMapper midUserShareMapper;
 
     @Autowired
     private final RocketmqTransactionLogMapper rocketmqTransactionLogMapper;
@@ -161,4 +163,48 @@ public class ShareService {
         return new PageInfo<>(shares);
     }
 
+    public Share exchangeById(Integer id, HttpServletRequest httpServletRequest) {
+        // 查询分享的id是否存在
+        Share share = shareMapper.selectByPrimaryKey(id);
+        if (share == null) {
+            throw new IllegalArgumentException("分享数据不存在！");
+        }
+
+        // 获取登录的用户ID
+        int userId = (int)httpServletRequest.getAttribute("id");
+
+        // 查询是否已经兑换过
+        MidUserShare midUserShare = this.midUserShareMapper.selectOne(
+                                                                MidUserShare.builder()
+                                                                            .userId(userId)
+                                                                            .shareId(share.getId())
+                                                                            .build());
+        if (midUserShare != null) {
+            return share;
+        }
+
+        // 查询登录用户的积分是否足够
+        UserDTO userDTO = this.userCenterFeignClient.findByUserId(userId);
+        if (userDTO != null && share.getPrice() > userDTO.getBonus()) {
+            throw new IllegalArgumentException("积分不足，无法兑换！");
+        }
+
+        // 对积分做扣减，并对mid_user_share表新增数据记录
+        this.userCenterFeignClient.addBonus(UserAddBonusDTO.builder()
+                                                           .userId(userId)
+                                                           .bonus(0 - share.getPrice())
+                                                           .event("兑换分享")
+                                                           .description("扣减积分")
+                                                           .build());
+
+        // mid_user_share表添加数据
+        this.midUserShareMapper.insertSelective(
+                MidUserShare.builder()
+                            .userId(userId)
+                            .shareId(share.getId())
+                            .build()
+        );
+
+        return share;
+    }
 }

@@ -9,6 +9,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import javax.servlet.http.HttpServletRequest;
+
 @RestController
 @RequestMapping("/shares")
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
@@ -35,4 +37,11 @@ public class ShareController {
 
         return this.shareService.selectByParam(title, pageNo, pageSize);
     }
+
+    @GetMapping("/exchange/{id}")
+    @CheckLogin
+    public Share exchangeById(@PathVariable Integer id, HttpServletRequest httpServletRequest) {
+        return this.shareService.exchangeById(id, httpServletRequest);
+    }
+
 }

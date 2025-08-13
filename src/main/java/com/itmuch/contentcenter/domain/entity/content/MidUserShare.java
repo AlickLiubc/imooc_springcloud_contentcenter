@@ -1,8 +1,17 @@
 package com.itmuch.contentcenter.domain.entity.content;
 
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
 import javax.persistence.*;
 
 @Table(name = "mid_user_share")
+@AllArgsConstructor
+@NoArgsConstructor
+@Data
+@Builder
 public class MidUserShare {
     @Id
     @GeneratedValue(generator = "JDBC")
