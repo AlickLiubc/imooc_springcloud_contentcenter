@@ -25,7 +25,9 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.RestTemplate;
 
 import javax.servlet.http.HttpServletRequest;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @Slf4j
@@ -156,11 +158,30 @@ public class ShareService {
                 );
     }
 
-    public PageInfo<Share> selectByParam(String title, Integer pageNo, Integer pageSize) {
+    public PageInfo<Share> selectByParam(String title, Integer pageNo, Integer pageSize, Integer userId) {
         PageHelper.startPage(pageNo, pageSize);
         List<Share> shares = this.shareMapper.selectByParam(title);
+        List<Share> sharesDeal;
 
-        return new PageInfo<>(shares);
+        if (userId != null) {
+            sharesDeal = shares.stream()
+                    .peek(x -> {
+                        MidUserShare midUserShare = this.midUserShareMapper.selectOne(MidUserShare.builder()
+                                .shareId(x.getId())
+                                .userId(userId)
+                                .build()
+                        );
+                        if (midUserShare == null) {
+                            x.setDownloadUrl(null);
+                        }
+                    }).collect(Collectors.toList());
+        } else {
+            sharesDeal = shares.stream()
+                                 .peek(x -> x.setDownloadUrl(null))
+                                 .collect(Collectors.toList());
+        }
+
+        return new PageInfo<>(sharesDeal);
     }
 
     public Share exchangeById(Integer id, HttpServletRequest httpServletRequest) {
