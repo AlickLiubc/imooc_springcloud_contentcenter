@@ -71,4 +71,16 @@ CREATE TABLE `share`  (
 INSERT INTO `share` VALUES (1, 0, '', '2025-05-08 12:10:59', '2025-05-08 12:10:59', 0, 'xxx', '', '', 0, '', 0, 0, '0', '');
 INSERT INTO `share` VALUES (2, 0, '', '2025-05-08 12:11:05', '2025-05-08 12:11:05', 0, 'xxx', '', '', 0, '', 0, 0, '0', '');
 
+-- ----------------------------
+-- Table structure for rocketmq_transaction_log
+-- ----------------------------
+DROP TABLE IF EXISTS `rocketmq_transaction_log`;
+CREATE TABLE `rocketmq_transaction_log`  (
+                                             `id` int(11) NOT NULL AUTO_INCREMENT COMMENT 'id',
+                                             `transaction_Id` varchar(45) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '事务id',
+                                             `log` varchar(45) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '日志',
+                                             PRIMARY KEY (`id`) USING BTREE
+) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = 'RocketMQ事务日志表' ROW_FORMAT = Dynamic;
+
+
 SET FOREIGN_KEY_CHECKS = 1;
